@@ -116,7 +116,7 @@ def evaluateNN(model, test_set, batch_size):
     Args:
     model (nn.Module): The trained PyTorch model.
     test_set (pd.DataFrame): The test dataset, where the last column is the target variable.
-    batch_size (int, optional): Batch size for processing the test set. Defaults to 8192.
+    batch_size (int): Batch size for processing the test set.
 
     Returns:
     tuple: Confusion matrix values (TN, FP, FN, TP) and energy measurement.
@@ -149,7 +149,7 @@ capacity = 200
 error_rate = 0.01
 num_of_neurons_in_hidden_layer = 16
 epochs = 20
-batch_size = 8192 # INCREASING batch_size: FASTER RESULTS & MAYBE LESS ACCURATE
+batch_size = 8192 # Batch size for processing the train/test set.
 scaler = StandardScaler()
 
 # Importing dataset
