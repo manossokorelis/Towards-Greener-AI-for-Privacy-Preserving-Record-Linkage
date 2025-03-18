@@ -92,13 +92,13 @@ def creatingPairs(bfA, bfB):
     pairs['Matched'] = (pairs['IdA'] == pairs['IdB']).astype(int)
     return pairs[['BloomFilterA', 'BloomFilterB', 'Matched']]
 
-def creatingFeatures(pairs, batch_size=1000000):
+def creatingFeatures(pairs, batch_size):
     """
     Computes similarity and distance metrics for pairs of Bloom filters.
 
     Args:
     pairs (pd.DataFrame): DataFrame containing 'BloomFilterA', 'BloomFilterB', and 'Matched' columns.
-    batch_size (int, optional): Number of pairs to process in each batch to optimize memory usage. Defaults to 1,000,000.
+    batch_size (int): Number of pairs to process in each batch to optimize memory usage.
 
     Returns:
     pd.DataFrame: A DataFrame containing Jaccard Similarity, Dice Similarity, and Hamming Distance for each pair.
@@ -125,6 +125,7 @@ faults_per_record = 1
 capacity = 200
 error_rate = 0.01
 flip_probability = 0.01
+batch_size = 1000000 # Number of pairs to process in each batch to optimize memory usage
 
 # Importing datasets
 dataA, dataB = importingDatasets(file_pathA='/home/emmanouil-sokorelis/Thesis/datasets/POW_A_10000.csv', file_pathB=f'/home/emmanouil-sokorelis/Thesis/datasets/POW_B_{faults_per_record}_10000.csv')
@@ -141,7 +142,7 @@ pairs = creatingPairs(bfA=bfA, bfB=bfB)
 # Creating features (Jacaard similarity, Dice similarity, Hamming distance) and measuring energy with PyRAPL
 cf = pyRAPL.Measurement('creatingFeatures')
 cf.begin()
-dataset = creatingFeatures(pairs=pairs)
+dataset = creatingFeatures(pairs=pairs, batch_size=batch_size)
 cf.end()
 
 # Results
