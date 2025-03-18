@@ -125,7 +125,9 @@ faults_per_record = 1
 capacity = 200
 error_rate = 0.01
 flip_probability = 0.01
-batch_size = 1000000 # Number of pairs to process in each batch to optimize memory usage
+##### OPTIMIZE MEMORY #####
+batch_size = 1000000 
+###########################
 
 # Importing datasets
 dataA, dataB = importingDatasets(file_pathA='/home/emmanouil-sokorelis/Thesis/datasets/POW_A_10000.csv', file_pathB=f'/home/emmanouil-sokorelis/Thesis/datasets/POW_B_{faults_per_record}_10000.csv')
