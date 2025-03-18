@@ -30,29 +30,35 @@ def splittingIntoTrainAndTestSets(dataset, test_size=0.20):
 
 class NeuralNetwork(nn.Module):
     """
-    A simple feedforward neural network with one hidden layer.
+    A simple feedforward neural network with configurable hidden layers.
 
     Args:
     input_size (int): Number of input features.
-    num_of_neurons_in_hidden_layer (int): Number of neurons in the hidden layer.
+    num_hidden_layers (int): Number of hidden layers.
+    num_of_neurons_in_hidden_layer (int): Number of neurons per hidden layer.
     """
-    def __init__(self, input_size, num_of_neurons_in_hidden_layer):
+    def __init__(self, input_size, num_hidden_layers, num_of_neurons_in_hidden_layer):
         super(NeuralNetwork, self).__init__()
-        layers = []
-        layers.append(nn.Linear(input_size, num_of_neurons_in_hidden_layer))
-        layers.append(nn.BatchNorm1d(num_of_neurons_in_hidden_layer))
-        layers.append(nn.ReLU())
+        layers = [nn.Linear(input_size, num_of_neurons_in_hidden_layer), nn.BatchNorm1d(num_of_neurons_in_hidden_layer), nn.ReLU()]
+        
+        for _ in range(num_hidden_layers - 1):
+            layers.append(nn.Linear(num_of_neurons_in_hidden_layer, num_of_neurons_in_hidden_layer))
+            layers.append(nn.BatchNorm1d(num_of_neurons_in_hidden_layer))
+            layers.append(nn.ReLU())
+        
         layers.append(nn.Linear(num_of_neurons_in_hidden_layer, 1))
         self.model = nn.Sequential(*layers)
+    
     def forward(self, x):
         return self.model(x) 
 
-def trainingNN(train_set, num_of_neurons_in_hidden_layer, val_size, epochs, batch_size):
+def trainingNN(train_set, num_hidden_layers, num_of_neurons_in_hidden_layer, val_size, epochs, batch_size):
     """
     Trains a neural network using the given training dataset.
 
     Args:
     train_set (pd.DataFrame): The training dataset, where the last column is the target variable.
+    num_hidden_layers (int): Number of hidden layers.
     num_of_neurons_in_hidden_layer (int): Number of neurons in the hidden layer.
     val_size (float): Proportion of data to be used for validation.
     epochs (int): Number of training epochs.
@@ -67,7 +73,7 @@ def trainingNN(train_set, num_of_neurons_in_hidden_layer, val_size, epochs, batc
     training_features = torch.tensor(training_features, dtype=torch.float32)
     training_labels = torch.tensor(training_labels, dtype=torch.float32).view(-1, 1)
     X_train, X_val, y_train, y_val = train_test_split(training_features, training_labels, test_size=val_size, random_state=42, stratify=training_labels)
-    model = NeuralNetwork(X_train.shape[1], num_of_neurons_in_hidden_layer) 
+    model = NeuralNetwork(X_train.shape[1], num_hidden_layers, num_of_neurons_in_hidden_layer) 
     positive_count = (train_set.iloc[:, -1] == 1).sum()
     negative_count = (train_set.iloc[:, -1] == 0).sum()
     criterion = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([negative_count / positive_count]))
@@ -147,9 +153,12 @@ faults_per_record = 1
 flip_probability = 0.01
 capacity = 200
 error_rate = 0.01
-num_of_neurons_in_hidden_layer = 16
 epochs = 20
-batch_size = 8192 # Batch size for processing the train/test set.
+##### OPTIMIZE MEMORY #####
+num_hidden_layers = 1 
+num_of_neurons_in_hidden_layer = 16
+batch_size = 8192
+###########################
 scaler = StandardScaler()
 
 # Importing dataset
@@ -159,14 +168,16 @@ dataset = pd.read_csv(f"/home/emmanouil-sokorelis/Thesis/datasets/encoding_pairs
 train_set, test_set = splittingIntoTrainAndTestSets(dataset=dataset)
 
 # Training neural network and measuring energy with PyRAPL
-model, tnn = trainingNN(train_set=train_set, num_of_neurons_in_hidden_layer=num_of_neurons_in_hidden_layer, val_size=0.25, epochs=epochs, batch_size=batch_size)
+model, tnn = trainingNN(train_set=train_set, num_hidden_layers=num_hidden_layers, num_of_neurons_in_hidden_layer=num_of_neurons_in_hidden_layer, val_size=0.25, epochs=epochs, batch_size=batch_size)
 
 # Evaluating neural network and measuring energy with PyRAPL
 TN, FP, FN, TP, enn = evaluateNN(model=model, test_set=test_set, batch_size=batch_size)
 
 # Results
 print(f"Faults Per Record: {faults_per_record}, Capacity: {capacity}, Error Rate: {error_rate}, Flip Probability: {flip_probability}")
-print(f"Number of Neurons in Hidden Layer: {num_of_neurons_in_hidden_layer}, Total Epochs: {epochs}")
+print(f"Total Epochs: {epochs}")
+print(f"Batch Size: {batch_size}")
+print(f"Number of Hidden Layers: {num_hidden_layers}, Number of Neurons in Hidden Layer: {num_of_neurons_in_hidden_layer}")
 print(f"Time for Training Neural Network: {tnn.result.duration}")
 print(f"CPU Energy Consumed on Training Neural Network: {tnn.result.pkg}")
 print(f"RAM Energy Consumed on Training Neural Network: {tnn.result.dram}")
@@ -174,5 +185,3 @@ print(f"Time for Evaluating Neural Network: {enn.result.duration}")
 print(f"CPU Energy Consumed on Evaluating Neural Network: {enn.result.pkg}")
 print(f"RAM Energy Consumed on Evaluating Neural Network: {enn.result.dram}")
 print(f"TN: {TN}, FP: {FP}, FN: {FN}, TP: {TP}")
-
-
