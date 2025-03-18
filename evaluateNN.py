@@ -109,7 +109,7 @@ def trainingNN(train_set, num_of_neurons_in_hidden_layer, val_size, epochs, batc
     tnn.end()
     return model, tnn
 
-def evaluateNN(model, test_set, batch_size=8192):
+def evaluateNN(model, test_set, batch_size):
     """
     Evaluates a trained neural network on the provided test dataset and computes confusion matrix metrics.
 
@@ -149,6 +149,7 @@ capacity = 200
 error_rate = 0.01
 num_of_neurons_in_hidden_layer = 16
 epochs = 20
+batch_size = 8192 # INCREASING batch_size: FASTER RESULTS & MAYBE LESS ACCURATE
 scaler = StandardScaler()
 
 # Importing dataset
@@ -158,10 +159,10 @@ dataset = pd.read_csv(f"/home/emmanouil-sokorelis/Thesis/datasets/encoding_pairs
 train_set, test_set = splittingIntoTrainAndTestSets(dataset=dataset)
 
 # Training neural network and measuring energy with PyRAPL
-model, tnn = trainingNN(train_set=train_set, num_of_neurons_in_hidden_layer=num_of_neurons_in_hidden_layer, val_size=0.25, epochs=epochs, batch_size=8192)
+model, tnn = trainingNN(train_set=train_set, num_of_neurons_in_hidden_layer=num_of_neurons_in_hidden_layer, val_size=0.25, epochs=epochs, batch_size=batch_size)
 
 # Evaluating neural network and measuring energy with PyRAPL
-TN, FP, FN, TP, enn = evaluateNN(model=model, test_set=test_set)
+TN, FP, FN, TP, enn = evaluateNN(model=model, test_set=test_set, batch_size=batch_size)
 
 # Results
 print(f"Faults Per Record: {faults_per_record}, Capacity: {capacity}, Error Rate: {error_rate}, Flip Probability: {flip_probability}")
