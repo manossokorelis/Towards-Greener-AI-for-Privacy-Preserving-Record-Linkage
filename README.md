@@ -1,8 +1,2 @@
 # Towards-Greener-AI-for-Privacy-Preserving-Record-Linkage
-
-This repository contains a sample code from my university thesis, which explores the intersection of accuracy, privacy, and energy efficiency in deep learning-based entity resolution (ER). The research integrates differential privacy and Bloom filters to enhance privacy while optimizing energy consumption. 
-
-Repository Structure:
-- encoding_data.py: Contains a sample code for generating similarity and difference features between pairs of Bloom filters.
-- evaluateNN.py: Implements the training and evaluation of a neural network for entity resolution.
-- data: Sample datasets which used in the study.
+This work investigates the convergence of accuracy, privacy, and energy efficiency in a novel Entity Resolution (ER) process. The study focuses on analyzing the impact of integrating differential privacy and deep learning into an ER workflow using Bloom filters. Specifically, it examines the CPU energy consumption and total RAM usage to assess the trade-offs between privacy preservation, computational efficiency, and model performance.
